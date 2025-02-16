@@ -1,101 +1,97 @@
-import Image from "next/image";
+'use client';
+import { useState, useEffect } from 'react';
+import { Note } from '@/types/note';
+import { getNotes, deleteNote } from '@/lib/storage';
+import Link from 'next/link';
+import { TrashIcon, PencilSquareIcon, PlusCircleIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [notes, setNotes] = useState<Note[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    setNotes(getNotes());
+  }, []);
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this note?')) {
+      setNotes(deleteNote(id));
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white dark:from-slate-900 dark:to-slate-800 p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-12">
+          <h1 className="text-4xl font-bold text-slate-800 dark:text-white">
+            My Notes
+            <span className="ml-3 text-blue-500 text-xl font-medium">
+              {notes.length} notes
+            </span>
+          </h1>
+          <Link
+            href="/note/new"
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-blue-200/50 dark:hover:shadow-blue-900/30"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <PlusCircleIcon className="w-5 h-5" />
+            New Note
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {notes.length === 0 ? (
+          <div className="text-center py-24">
+            <DocumentTextIcon className="w-24 h-24 text-gray-300 mx-auto mb-6 dark:text-slate-600" />
+            <p className="text-xl text-gray-500 mb-4 dark:text-slate-400">
+              No notes found. Lets create your first note!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {notes.map(note => (
+              <div
+                key={note.id}
+                className="group relative bg-white dark:bg-slate-700 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-slate-600 hover:-translate-y-1"
+              >
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleDelete(note.id)}
+                      className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors"
+                      title="Delete note"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                    <Link
+                      href={`/note/${note.id}`}
+                      className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors"
+                      title="Edit note"
+                    >
+                      <PencilSquareIcon className="w-5 h-5" />
+                    </Link>
+                  </div>
+                </div>
+                <h2 className="text-xl font-semibold text-slate-800 dark:text-white mb-3 pr-8">
+                  {note.title || 'Untitled Note'}
+                </h2>
+                <p className="text-gray-600 dark:text-slate-300 mb-4 line-clamp-4 text-sm leading-relaxed">
+                  {note.content || 'No content'}
+                </p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-400 dark:text-slate-400">
+                    {new Date(note.date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                  <span className="text-blue-500 dark:text-blue-400 font-medium">
+                    {Math.ceil(note.content.length / 200)} min read
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
